@@ -8,16 +8,11 @@ $amountOfScans = $items.Length
 $typeOfScanner = ""
 
 $scanArray = @()
-$scanObject = New-Object System.Object
-
-
 
 foreach( $i in $items)  {
     Start-Process ((Resolve-Path ("$folderpath$i")).Path)
     Start-Sleep -Seconds 1
     $counterID++ 
-
- 
 
     $orderID = [Microsoft.VisualBasic.Interaction]::InputBox("Enter the Order ID for scan $counterID / $amountOfScans :", $i)
 
@@ -25,37 +20,33 @@ foreach( $i in $items)  {
         $reasonForDeletion = [Microsoft.VisualBasic.Interaction]::InputBox("Enter a reason for marking $i for deletion :", $i)
     }
 
+    Write-host("name $i.Length")
+    Write-Host("Length $fileNameLength")
 
-    if ($i.Length -eq 24){
+    $tempFileName = Get-ItemProperty ((Resolve-Path ("$folderpath$i")).Path) | select -exp name
+    $fileNameLength = $tempFileName.Length
+    
+
+    if ($fileNameLength -eq 24){
         $typeOfScanner = "Xerox"
     }
-    elseif ($ie.Length -eq 33) {
+    elseif ($fileNameLength -eq 33) {
         $typeOfScanner = "Lexmark"
     }
 
     $DateCreated = Get-ItemProperty ((Resolve-Path ("$folderpath$i")).Path) | select -exp CreationTime
-    $DateModified1 = Get-Date -Format dd/MM/yyyy        
-    $DateModified2 = Get-Date -Format HH:mm:ss
-    $DateModifiedTotal = ("$DateModified1 $DateModified2")
-    
-    $scanObject[$counterID] | Add-Member -type NoteProperty -name TempName -Value "$i" 
-    $scanObject[$counterID] | Add-Member -type NoteProperty -name NewName -Value "$orderID"
-    $scanObject[$counterID] | Add-Member -type NoteProperty -name TypeOfScanner -Value "$typeOfScanner"
-    $scanObject[$counterID] | Add-Member -type NoteProperty -name DateCreated -Value "$DateCreated"
-    $scanObject[$counterID] | Add-Member -type NoteProperty -name DateModified -Value "$DateModifiedTotal"
-    $scanObject[$counterID] | Add-Member -type NoteProperty -name ReasonForDeletion -Value "$reasonForDeletion"
+    $DateModified = Get-Date -Format "dd/MM/yyyy HH:mm:ss"
 
-    $scanArray += $scanObject[$counterID]
+    [array]$scanArray += [PSCustomObject] @{
+        TempName          = "$i"
+        NewName           = "$orderID"
+        TypeOfScanner     = "$typeOfScanner"
+        DateCreated       = "$DateCreated"
+        DateModified      = "$DateModified"
+        ReasonForDeletion = "$reasonForDeletion"
+    }
 
-
-   
-  
     Stop-Process -Name "Acro*"
-
-
-
-
-
 
     if ($orderID -eq "delete"){
 
@@ -64,17 +55,11 @@ foreach( $i in $items)  {
     }
     else {
 
-
         Add-Content -Path 'C:\Scans\Landesk.csv' -Value "`"$i`",`"$orderID`""
        # Add-Content -Path 'C:\Scans\renamed_stats.csv' -Value  "`"$typeOfScanner`",`"$i`",`"$orderID`",`"$DateCreated`",`"$DateDeleted`",`"$FileSize`""
     } 
-
-
-
-
-
 }
- <#
+ 
 $csv = Import-Csv C:\Scans\Landesk.csv
 
 $csv | Foreach-Object { 
@@ -92,6 +77,5 @@ $csv | Foreach-Object {
         }
     }
 }
-#>
 
-$scanArray | export-csv C:\Scans\renamed_stats.csv -notypeinformation
+$scanArray | export-csv -append C:\Scans\renamed_stats.csv -notypeinformation
