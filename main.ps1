@@ -13,6 +13,7 @@ foreach( $i in $items)  {
     Start-Process ((Resolve-Path ("$folderpath$i")).Path)
     Start-Sleep -Seconds 1
     $counterID++ 
+    $reasonForDeletion = ""
 
     $orderID = [Microsoft.VisualBasic.Interaction]::InputBox("Enter the Order ID for scan $counterID / $amountOfScans :", $i)
 
