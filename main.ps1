@@ -13,13 +13,9 @@ foreach( $i in $items)  {
     Start-Process ((Resolve-Path ("$folderpath$i")).Path)
     Start-Sleep -Seconds 1
     $counterID++ 
-    $reasonForDeletion = ""
+    $ExtraDetails = ""
 
     $orderID = [Microsoft.VisualBasic.Interaction]::InputBox("Enter the Order ID for scan $counterID / $amountOfScans :", $i)
-
-    if ($orderID -eq "delete"){
-        $reasonForDeletion = [Microsoft.VisualBasic.Interaction]::InputBox("Enter a reason for marking $i for deletion :", $i)
-    }
 
     $tempFileName = Get-ItemProperty ((Resolve-Path ("$folderpath$i")).Path) | Select-Object -exp name
     $fileNameLength = $tempFileName.Length
@@ -31,26 +27,39 @@ foreach( $i in $items)  {
         $typeOfScanner = "Lexmark"
     }
 
-    $DateCreated = Get-ItemProperty ((Resolve-Path ("$folderpath$i")).Path) | Select-Object -exp CreationTime
+    $DateCreated = Get-ItemProperty ((Resolve-Path ("$folderpath$i")).Path) | Select-Object -exp CreationTime | Get-Date -f "dd/MM/yyyy HH:mm:ss" 
     $DateModified = Get-Date -Format "dd/MM/yyyy HH:mm:ss"
 
-    [array]$scanArray += [PSCustomObject] @{
-        TempName          = "$i"
-        NewName           = "$orderID"
-        TypeOfScanner     = "$typeOfScanner"
-        DateCreated       = "$DateCreated"
-        DateModified      = "$DateModified"
-        ReasonForDeletion = "$reasonForDeletion"
+    if ($orderID -eq "delete"){
+
+        $ExtraDetails = [Microsoft.VisualBasic.Interaction]::InputBox("Enter a reason for marking $i for deletion :", $i)
+
+        Add-Content -Path 'C:\Scans\csv\Landesk_Delete.csv' -Value "`"$i`",`"delete`""
+
+        [array]$scanArrayDelete += [PSCustomObject] @{
+            TempName          = "$i"
+            NewName           = "$orderID"
+            TypeOfScanner     = "$typeOfScanner"
+            DateCreated       = "$DateCreated"
+            DateModified      = "$DateModified"
+            ReasonForDeletion = "$ExtraDetails"
+        }
+    }
+    else {
+        Add-Content -Path 'C:\Scans\csv\Landesk_Rename.csv' -Value "`"$i`",`"$orderID`""
+
+        [array]$scanArrayRename += [PSCustomObject] @{
+            TempName          = "$i"
+            NewName           = "$orderID"
+            TypeOfScanner     = "$typeOfScanner"
+            DateCreated       = "$DateCreated"
+            DateModified      = "$DateModified"
+            Branch = "$ExtraDetails"
+        }
     }
 
     Stop-Process -Name "Acro*"
 
-    if ($orderID -eq "delete"){
-        Add-Content -Path 'C:\Scans\csv\Landesk_Delete.csv' -Value "`"$i`",`"delete`""
-    }
-    else {
-        Add-Content -Path 'C:\Scans\csv\Landesk_Rename.csv' -Value "`"$i`",`"$orderID`""
-    }
 }
  
 $csv_rename = Import-Csv 'C:\Scans\csv\Landesk_Rename.csv'
@@ -77,4 +86,5 @@ $csv_delete | Foreach-Object {
     }
 }
 
-$scanArray | export-csv -append 'C:\Scans\csv\renamed_stats.csv' -notypeinformation
+$scanArrayDelete | export-csv -append 'C:\Scans\csv\deleted_stats.csv' -notypeinformation
+$scanArrayRename | export-csv -append 'C:\Scans\csv\renamed_stats.csv' -notypeinformation
