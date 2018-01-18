@@ -55,6 +55,7 @@ foreach( $i in $items)  {
             DateCreated       = "$DateCreated"
             DateModified      = "$DateModified"
             Branch = "$ExtraDetails"
+            SalesExec = "$ExtraDetails"
         }
     }
 
