@@ -14,8 +14,12 @@ foreach( $i in $items)  {
     Start-Sleep -Seconds 1
     $counterID++ 
     $ExtraDetails = ""
-
-    $orderID = [Microsoft.VisualBasic.Interaction]::InputBox("Enter the Order ID for scan $counterID / $amountOfScans :", $i)
+ 
+    do{
+        $orderID = ""
+        $orderID = [Microsoft.VisualBasic.Interaction]::InputBox("Enter the Order ID for scan $counterID / $amountOfScans :", $i)
+    } Until (($orderID.Length -eq 7) -or ($orderID = "delete"))
+    
 
     $tempFileName = Get-ItemProperty ((Resolve-Path ("$folderpath$i")).Path) | Select-Object -exp name
     $fileNameLength = $tempFileName.Length
