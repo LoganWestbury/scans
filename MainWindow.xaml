@@ -1,4 +1,4 @@
-﻿<Controls:MetroWindow x:Class="ScanDocs.MainWindow"
+<Controls:MetroWindow x:Class="ScanDocs.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -6,9 +6,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ScanDocs"
         mc:Ignorable="d"
-        Title="Scanner" Height="400" Width="600" ResizeMode="CanMinimize">
+        Title="LW" Height="110" Width="160" ResizeMode="CanMinimize">
     <Grid>
-        <Button Content="Button" HorizontalAlignment="Left" Margin="118,86,0,0" VerticalAlignment="Top" Width="75"/>
-
+        <Button x:Name="cmdLogin" Content="LOGIN" HorizontalAlignment="Left" Margin="10,45,0,0" VerticalAlignment="Top" Width="134" IsDefault="True"/>
+        <PasswordBox x:Name="pswLogin" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="134" Height="20"/>
     </Grid>
- </Controls:MetroWindow>
+</Controls:MetroWindow>
